@@ -517,24 +517,14 @@ function pilihK(k){
   document.getElementById('kc8').className = 'kcard'+(k===8?' sel-k8':'');
   document.getElementById('lhero').className = 'lhero k'+k;
   document.getElementById('btn-start').className = 'bstart k'+k;
-
-  // Update import hint
-  const isK7 = k===7;
-  document.getElementById('imp-label').textContent = `② Import Soal Excel (File Kelas ${k})`;
+  const fmt = k===7 ? '30 PG + 5 B/S + 5 Isian + 5 Uraian' : '40 PG + 5 Uraian';
+  document.getElementById('imp-label').textContent = '② Import Soal Excel (Opsional)';
   if(!importedKelas){
-    document.getElementById('imp-title').textContent = `Klik untuk pilih template_soal_asat_kelas${k}.xlsx`;
-    document.getElementById('imp-sub').textContent = `File khusus Kelas ${k}`;
+    document.getElementById('imp-title').textContent = 'Soal Kelas '+k+' sudah tersedia — import hanya jika ingin ganti soal';
+    document.getElementById('imp-sub').textContent = fmt;
   }
-
-  // Cek apakah file sudah diimport dan cocok
-  if(importedKelas && importedKelas !== k){
-    showAlert(`⚠️ File yang diimport adalah untuk Kelas ${importedKelas}. Silakan import ulang file Kelas ${k}.`,'warn');
-    resetBank();
-  } else if(importedKelas === k){
-    hideAlert();
-    updateKDBox();
-    updateSummary();
-  }
+  if(importedKelas && importedKelas !== k){ hideAlert(); resetBank(); }
+  else if(importedKelas === k){ hideAlert(); updateKDBox(); updateSummary(); }
   cekForm();
 }
 
@@ -662,8 +652,13 @@ function updateSummary(){
 
 // ── FORM ─────────────────────────────────────────────────────────
 function cekForm(){
-  const soalOk=importedKelas===ST.kelas&&BANK.pg.length>0;
-  const ok=soalOk&&document.getElementById('inp-nama').value.trim()&&document.getElementById('inp-absen').value.trim()&&ST.kelas;
+  // Soal tersedia dari hardcode ATAU dari import Excel
+  const hasSoal = ST.kelas && (
+    (importedKelas===ST.kelas && BANK.pg.length>0) ||
+    (ST.kelas===7 && BANK_HARDCODE.pg_k7.length>0) ||
+    (ST.kelas===8 && BANK_HARDCODE.pg_k8.length>0)
+  );
+  const ok = hasSoal && document.getElementById('inp-nama').value.trim() && document.getElementById('inp-absen').value.trim() && ST.kelas;
   document.getElementById('btn-start').disabled=!ok;
 }
 
